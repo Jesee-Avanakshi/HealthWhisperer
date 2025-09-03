@@ -85,8 +85,92 @@ def log_interaction(mood_input, suggestion, user_id):
         db.session.rollback()
 
 def get_wellness_suggestion(mood_input):
-    """Get wellness suggestion - using fallback for now"""
-    return random.choice(WELLNESS_SUGGESTIONS)
+    """Get contextual wellness suggestion based on mood input"""
+    mood_lower = mood_input.lower()
+    
+    # Positive/Grateful responses
+    if any(word in mood_lower for word in ['grateful', 'thankful', 'blessed', 'good', 'positive', 'happy', 'great', 'wonderful', 'amazing', 'excited', 'joyful']):
+        positive_suggestions = [
+            "That's wonderful! Keep nurturing this positive energy by writing down three things you're grateful for today.",
+            "Your gratitude is beautiful! Consider sharing your positive energy with someone you care about today.",
+            "Keep going - you're doing great! Take a moment to celebrate this good feeling and remember what brought it about.",
+            "Your positive mindset is powerful! Try doing something kind for yourself or others to maintain this beautiful energy.",
+            "Amazing! When we feel grateful, it's the perfect time to set positive intentions for the rest of your day.",
+            "Your gratitude is contagious! Consider reaching out to someone who has made a positive impact in your life."
+        ]
+        return random.choice(positive_suggestions)
+    
+    # Stressed/Overwhelmed responses
+    elif any(word in mood_lower for word in ['stressed', 'overwhelmed', 'pressure', 'busy', 'hectic', 'chaotic', 'rushed']):
+        stress_suggestions = [
+            "It sounds like you have a lot on your plate. Try the 4-7-8 breathing technique: breathe in for 4, hold for 7, exhale for 8.",
+            "When feeling overwhelmed, break your tasks into smaller, manageable pieces. Focus on just one thing at a time.",
+            "Take a 5-minute break right now. Step away from what you're doing and do some gentle neck and shoulder stretches.",
+            "Stress often builds up in our bodies. Try progressive muscle relaxation: tense and release each muscle group for 5 seconds.",
+            "Remember: you don't have to do everything at once. Write down your priorities and tackle the most important one first.",
+            "Consider taking a short walk outside. Fresh air and movement can help reset your stress levels naturally."
+        ]
+        return random.choice(stress_suggestions)
+    
+    # Anxious/Worried responses
+    elif any(word in mood_lower for word in ['anxious', 'worried', 'nervous', 'scared', 'afraid', 'panic', 'fear', 'concerned']):
+        anxiety_suggestions = [
+            "Anxiety can feel overwhelming, but you're not alone. Try grounding yourself by naming 5 things you can see, 4 you can touch, 3 you can hear.",
+            "When worry takes over, remind yourself: 'This feeling is temporary, and I am safe right now.' Focus on your breath.",
+            "Anxiety often comes from focusing on the future. Bring yourself to the present with some mindful deep breathing.",
+            "Try the 'worry window' technique: set aside 10 minutes later today to think about your concerns, then let them go for now.",
+            "Your feelings are valid. Consider writing down your worries - sometimes getting them out of your head helps reduce their power.",
+            "Practice self-compassion. Speak to yourself with the same kindness you'd show a good friend going through this."
+        ]
+        return random.choice(anxiety_suggestions)
+    
+    # Sad/Down responses
+    elif any(word in mood_lower for word in ['sad', 'down', 'depressed', 'blue', 'low', 'upset', 'hurt', 'disappointed', 'lonely']):
+        sad_suggestions = [
+            "I hear that you're going through a difficult time. Be gentle with yourself - it's okay to feel sad sometimes.",
+            "When we're feeling low, small acts of self-care matter. Try making yourself a warm cup of tea or taking a warm shower.",
+            "Sadness is a natural human emotion. Consider reaching out to someone you trust, or write about your feelings in a journal.",
+            "Sometimes when we're down, moving our body gently can help. Try some light stretching or a slow walk.",
+            "You're going through something tough right now, and that takes strength. What's one tiny thing you can do to be kind to yourself today?",
+            "Remember that this feeling won't last forever. Consider doing one small thing that usually brings you comfort."
+        ]
+        return random.choice(sad_suggestions)
+    
+    # Tired/Low Energy responses
+    elif any(word in mood_lower for word in ['tired', 'exhausted', 'drained', 'low energy', 'fatigue', 'weary', 'sleepy']):
+        tired_suggestions = [
+            "Your body and mind need rest. If possible, try to take a 10-20 minute power nap or simply lie down with your eyes closed.",
+            "When we're tired, our bodies need nourishment. Make sure you're drinking enough water and eating something nutritious.",
+            "Low energy might be your body's way of asking for a break. Try some gentle stretching or deep breathing exercises.",
+            "Fatigue can be physical or emotional. Consider what might help you recharge - rest, nutrition, or maybe some fresh air?",
+            "Listen to your body's signals. Sometimes the most productive thing we can do is rest and restore our energy.",
+            "Try the 'energy audit' approach: what activities drain you vs. energize you? Focus on the energizing ones today."
+        ]
+        return random.choice(tired_suggestions)
+    
+    # Frustrated/Angry responses
+    elif any(word in mood_lower for word in ['frustrated', 'angry', 'mad', 'annoyed', 'irritated', 'furious', 'rage']):
+        anger_suggestions = [
+            "Frustration is a signal that something needs attention. Take some deep breaths and ask yourself what you need right now.",
+            "Anger has energy - try channeling it into something physical like a quick walk or some vigorous cleaning.",
+            "When we're frustrated, our thinking gets cloudy. Try the 'STOP' technique: Stop, Take a breath, Observe, Proceed mindfully.",
+            "It's okay to feel angry. Try expressing it safely - punch a pillow, scream in your car, or write it all down.",
+            "Frustration often comes from feeling out of control. What's one small thing you DO have control over right now?",
+            "Your feelings are valid. Once you've acknowledged the anger, think about what you need to feel better or solve the problem."
+        ]
+        return random.choice(anger_suggestions)
+    
+    # Default response for unclear or mixed emotions
+    else:
+        general_suggestions = [
+            "Thank you for sharing how you're feeling. Take a moment to breathe deeply and be present with yourself.",
+            "Whatever you're experiencing right now is valid. Consider doing something small and kind for yourself today.",
+            "Emotions can be complex. Try checking in with yourself throughout the day to see how your feelings change.",
+            "Sometimes the best thing we can do is acknowledge our feelings without trying to change them immediately.",
+            "Your emotional awareness is a strength. Consider what your feelings might be telling you that you need right now.",
+            "Remember to be patient with yourself as you navigate your emotions. What would feel most supportive right now?"
+        ]
+        return random.choice(general_suggestions)
 
 @app.route('/')
 def landing():
