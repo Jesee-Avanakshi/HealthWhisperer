@@ -48,6 +48,16 @@ class WellnessInteraction(db.Model):
     ai_suggestion = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+class FoodLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.Date, default=datetime.utcnow().date)
+    water_intake = db.Column(db.Integer, default=0)  # in glasses
+    meals = db.Column(db.Text, nullable=False)  # JSON string of meals
+    total_calories = db.Column(db.Integer, default=0)
+    nutritional_analysis = db.Column(db.Text)  # AI suggestions and analysis
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -105,6 +115,145 @@ def get_mood_chart_data(user_id):
         })
     
     return mood_counts, mood_timeline
+
+def analyze_food_intake(meals_text, water_glasses):
+    """Analyze food intake and provide nutritional guidance"""
+    import json
+    import re
+    
+    # Simple calorie estimation based on common foods
+    food_calories = {
+        'rice': 130, 'bread': 80, 'pasta': 220, 'quinoa': 220,
+        'chicken': 165, 'beef': 250, 'fish': 130, 'egg': 70, 'tofu': 70,
+        'apple': 80, 'banana': 105, 'orange': 60, 'berries': 40,
+        'salad': 20, 'vegetables': 25, 'potato': 160, 'sweet potato': 180,
+        'milk': 150, 'yogurt': 100, 'cheese': 110, 'nuts': 180,
+        'pizza': 285, 'burger': 540, 'fries': 365, 'soda': 140,
+        'chocolate': 235, 'cake': 240, 'cookie': 50
+    }
+    
+    meals_lower = meals_text.lower()
+    total_calories = 0
+    detected_foods = []
+    
+    # Detect foods and estimate calories
+    for food, calories in food_calories.items():
+        if food in meals_lower:
+            detected_foods.append(food)
+            # Estimate portion (simple logic)
+            count = meals_lower.count(food)
+            multiplier = 1.5 if any(word in meals_lower for word in ['large', 'big', 'extra', 'double']) else 1
+            total_calories += int(calories * count * multiplier)
+    
+    # Water intake analysis
+    recommended_water = 8  # glasses
+    water_status = "excellent" if water_glasses >= recommended_water else "needs improvement"
+    
+    # Calorie analysis
+    recommended_calories = 2000  # Basic recommendation
+    calorie_status = "high" if total_calories > recommended_calories else "good" if total_calories > 1200 else "low"
+    
+    return {
+        'total_calories': total_calories,
+        'detected_foods': detected_foods,
+        'water_status': water_status,
+        'calorie_status': calorie_status,
+        'recommended_water': recommended_water
+    }
+
+def get_nutritional_advice(analysis_data, meals_text):
+    """Generate personalized nutritional advice based on food analysis"""
+    total_calories = analysis_data['total_calories']
+    water_status = analysis_data['water_status']
+    calorie_status = analysis_data['calorie_status']
+    detected_foods = analysis_data['detected_foods']
+    meals_lower = meals_text.lower()
+    
+    advice = []
+    
+    # Calorie-based advice
+    if calorie_status == "high":
+        advice.append("🔥 Your calorie intake is higher than recommended today! Here are some ways to balance it out:")
+        advice.append("• Try a 30-minute brisk walk (burns ~150 calories)")
+        advice.append("• Do some light exercise like yoga or stretching")
+        advice.append("• Consider smaller portions for your next meals")
+        advice.append("• Avoid sugary drinks and snacks for the rest of the day")
+        
+        if any(food in meals_lower for food in ['pizza', 'burger', 'fries', 'cake', 'chocolate']):
+            advice.append("• I noticed some high-calorie foods - try balancing with vegetables and lean proteins tomorrow")
+    
+    elif calorie_status == "low":
+        advice.append("💙 Your calorie intake seems quite low today. Your body needs fuel to function well:")
+        advice.append("• Add healthy snacks like nuts, fruits, or yogurt")
+        advice.append("• Include more protein-rich foods like eggs, chicken, or beans")
+        advice.append("• Don't forget healthy fats from avocados, olive oil, or nuts")
+    
+    else:
+        advice.append("✨ Great job! Your calorie intake looks well-balanced today.")
+    
+    # Water intake advice
+    if water_status == "needs improvement":
+        advice.append("💧 You could use more water today! Try to reach 8 glasses:")
+        advice.append("• Keep a water bottle nearby as a reminder")
+        advice.append("• Add lemon or cucumber for flavor")
+        advice.append("• Set hourly reminders to take a few sips")
+    else:
+        advice.append("🌊 Excellent hydration! You're doing great with your water intake.")
+    
+    # Food quality advice
+    healthy_foods = ['salad', 'vegetables', 'fish', 'quinoa', 'berries', 'apple', 'yogurt']
+    unhealthy_foods = ['pizza', 'burger', 'fries', 'soda', 'cake', 'chocolate']
+    
+    healthy_count = sum(1 for food in healthy_foods if food in detected_foods)
+    unhealthy_count = sum(1 for food in unhealthy_foods if food in detected_foods)
+    
+    if healthy_count > unhealthy_count:
+        advice.append("🥗 I love seeing all those nutritious choices! Keep up the excellent eating habits.")
+    elif unhealthy_count > 0:
+        advice.append("🌱 Consider adding more fruits and vegetables to tomorrow's meals.")
+        advice.append("• Swap processed snacks for fresh fruits")
+        advice.append("• Try grilled instead of fried foods")
+        advice.append("• Add a colorful salad to your main meals")
+    
+    return "\n".join(advice)
+
+def log_food_intake(user_id, water_intake, meals_text):
+    """Log user's food and water intake to database"""
+    try:
+        # Check if entry already exists for today
+        today = datetime.utcnow().date()
+        existing_log = FoodLog.query.filter_by(user_id=user_id, date=today).first()
+        
+        # Analyze the food intake
+        analysis = analyze_food_intake(meals_text, water_intake)
+        nutritional_advice = get_nutritional_advice(analysis, meals_text)
+        
+        if existing_log:
+            # Update existing entry
+            existing_log.water_intake = water_intake
+            existing_log.meals = meals_text
+            existing_log.total_calories = analysis['total_calories']
+            existing_log.nutritional_analysis = nutritional_advice
+            existing_log.timestamp = datetime.utcnow()
+        else:
+            # Create new entry
+            food_log = FoodLog(
+                user_id=user_id,
+                date=today,
+                water_intake=water_intake,
+                meals=meals_text,
+                total_calories=analysis['total_calories'],
+                nutritional_analysis=nutritional_advice
+            )
+            db.session.add(food_log)
+        
+        db.session.commit()
+        return analysis, nutritional_advice
+        
+    except Exception as e:
+        print(f"Error logging food intake: {e}")
+        db.session.rollback()
+        return None, "Sorry, there was an error processing your food log."
 
 def categorize_mood(mood_input):
     """Categorize mood input into chart-friendly categories"""
@@ -731,6 +880,7 @@ def dashboard():
             <p>Share how you're feeling and get personalized suggestions to improve your wellbeing.</p>
             <a href="{{ url_for('check_in') }}" class="btn">💭 Start Check-In</a>
             <a href="{{ url_for('history') }}" class="btn">📊 View Full History</a>
+            <a href="{{ url_for('food_tracker') }}" class="btn">🍎 Track Food & Nutrition</a>
         </div>
         
         <div class="card">
@@ -1143,6 +1293,190 @@ def suggestion():
     </div>
 </body>
 </html>''', mood=mood, suggestion=suggestion)
+
+@app.route('/food-tracker', methods=['GET', 'POST'])
+@login_required
+def food_tracker():
+    """Food and nutrition tracker"""
+    if request.method == 'POST':
+        water_intake = int(request.form.get('water_intake', 0))
+        meals_text = request.form.get('meals', '').strip()
+        
+        if meals_text:
+            analysis, advice = log_food_intake(current_user.id, water_intake, meals_text)
+            if analysis:
+                flash('Your food intake has been logged and analyzed!', 'success')
+                return render_template_string('''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrition Analysis - Health Whisperer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; color: white;
+        }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+        .header { text-align: center; margin-bottom: 30px; padding: 20px 0; }
+        .card {
+            background: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px;
+            margin-bottom: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .nutrition-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 15px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .stat-number { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; }
+        .btn {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4); color: white; padding: 12px 25px;
+            border: none; border-radius: 25px; text-decoration: none; display: inline-block;
+            margin: 10px; font-weight: 600; text-align: center; transition: all 0.3s ease;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .advice-section { background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 15px; margin-top: 20px; white-space: pre-line; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍎 Your Nutrition Analysis</h1>
+            <p>Here's what I found about your food intake today</p>
+        </div>
+        <div class="nutrition-stats">
+            <div class="stat-card"><div class="stat-number">{{ analysis.total_calories }}</div><div>Total Calories</div></div>
+            <div class="stat-card"><div class="stat-number">{{ water_intake }}</div><div>Glasses of Water</div></div>
+            <div class="stat-card"><div class="stat-number">{{ analysis.detected_foods|length }}</div><div>Foods Detected</div></div>
+        </div>
+        <div class="card">
+            <h2>🥗 Detected Foods</h2>
+            <p>{{ ', '.join(analysis.detected_foods) if analysis.detected_foods else 'No specific foods detected' }}</p>
+        </div>
+        <div class="card">
+            <h2>💡 Personalized Nutrition Advice</h2>
+            <div class="advice-section">{{ advice }}</div>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{{ url_for('dashboard') }}" class="btn">🏠 Back to Dashboard</a>
+            <a href="{{ url_for('food_tracker') }}" class="btn">📝 Log More Food</a>
+        </div>
+    </div>
+</body>
+</html>''', analysis=analysis, advice=advice, water_intake=water_intake)
+            else:
+                flash('Sorry, there was an error processing your food log.', 'error')
+        else:
+            flash('Please enter your meals for the day.', 'error')
+    
+    # Get today's existing log if any
+    today = datetime.utcnow().date()
+    existing_log = FoodLog.query.filter_by(user_id=current_user.id, date=today).first()
+    
+    return render_template_string('''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food & Nutrition Tracker - Health Whisperer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; color: white;
+        }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+        .header { text-align: center; margin-bottom: 30px; padding: 20px 0; }
+        .card {
+            background: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px;
+            margin-bottom: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 1.1em; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white;
+            font-size: 16px; backdrop-filter: blur(5px);
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255, 255, 255, 0.7); }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .btn {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4); color: white; padding: 15px 30px;
+            border: none; border-radius: 25px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; width: 100%; margin-top: 10px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .examples { background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 10px; font-size: 0.9em; }
+        .flash-messages { margin-bottom: 20px; }
+        .flash-message { padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+        .flash-success { background: rgba(76, 175, 80, 0.3); border: 1px solid rgba(76, 175, 80, 0.5); }
+        .flash-error { background: rgba(244, 67, 54, 0.3); border: 1px solid rgba(244, 67, 54, 0.5); }
+        .existing-log { background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: rgba(255, 255, 255, 0.8); text-decoration: none; }
+        .back-link:hover { color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('dashboard') }}" class="back-link">← Back to Dashboard</a>
+        <div class="header">
+            <h1>🍎 Food & Nutrition Tracker</h1>
+            <p>Track your daily food intake and get personalized nutrition advice</p>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% if existing_log %}
+        <div class="existing-log">
+            <h3>📊 Today's Current Log</h3>
+            <p><strong>Water:</strong> {{ existing_log.water_intake }} glasses</p>
+            <p><strong>Calories:</strong> {{ existing_log.total_calories }}</p>
+            <p><strong>Last updated:</strong> {{ existing_log.timestamp.strftime('%I:%M %p') }}</p>
+        </div>
+        {% endif %}
+        <div class="card">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="water_intake">💧 How many glasses of water have you had today?</label>
+                    <input type="number" id="water_intake" name="water_intake" 
+                           value="{{ existing_log.water_intake if existing_log else 0 }}" 
+                           min="0" max="20" required>
+                    <div class="examples">
+                        <strong>Tip:</strong> Aim for 8 glasses (64 oz) per day for optimal hydration
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="meals">🍽️ What did you eat today? (Include all meals and snacks)</label>
+                    <textarea id="meals" name="meals" 
+                              placeholder="Example: Breakfast - 2 eggs, toast, banana. Lunch - chicken salad, apple. Dinner - grilled fish, vegetables, rice. Snacks - nuts, yogurt" 
+                              required>{{ existing_log.meals if existing_log else '' }}</textarea>
+                    <div class="examples">
+                        <strong>Include:</strong> Breakfast, lunch, dinner, snacks, drinks, portion sizes (small/medium/large), cooking methods (fried, grilled, baked)
+                    </div>
+                </div>
+                <button type="submit" class="btn">🔍 Analyze My Nutrition</button>
+            </form>
+        </div>
+        <div class="card">
+            <h3>🎯 What You'll Get</h3>
+            <ul style="margin-left: 20px; line-height: 1.8;">
+                <li>✅ Total calorie count for the day</li>
+                <li>💡 Personalized nutrition advice</li>
+                <li>🏃‍♂️ Exercise suggestions if calories are high</li>
+                <li>🥗 Food quality assessment</li>
+                <li>💧 Hydration feedback</li>
+                <li>📋 Recommendations for better eating</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>''', existing_log=existing_log)
 
 @app.route('/history')
 @login_required
