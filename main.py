@@ -121,15 +121,27 @@ def analyze_food_intake(meals_text, water_glasses):
     import json
     import re
     
-    # Simple calorie estimation based on common foods
+    # Comprehensive calorie estimation including Indian foods
     food_calories = {
+        # Basic foods
         'rice': 130, 'bread': 80, 'pasta': 220, 'quinoa': 220,
         'chicken': 165, 'beef': 250, 'fish': 130, 'egg': 70, 'tofu': 70,
         'apple': 80, 'banana': 105, 'orange': 60, 'berries': 40,
         'salad': 20, 'vegetables': 25, 'potato': 160, 'sweet potato': 180,
         'milk': 150, 'yogurt': 100, 'cheese': 110, 'nuts': 180,
         'pizza': 285, 'burger': 540, 'fries': 365, 'soda': 140,
-        'chocolate': 235, 'cake': 240, 'cookie': 50
+        'chocolate': 235, 'cake': 240, 'cookie': 50,
+        
+        # Indian foods and ingredients
+        'pulao': 320, 'biryani': 350, 'dal': 180, 'curry': 200, 'roti': 120,
+        'chapati': 120, 'naan': 160, 'paratha': 200, 'samosa': 150, 'dosa': 170,
+        'idli': 40, 'vada': 80, 'upma': 140, 'poha': 130, 'khichdi': 160,
+        'soya': 120, 'chana': 110, 'aloo': 110, 'paneer': 180, 'curd': 60,
+        'lassi': 120, 'chai': 50, 'papad': 30, 'pickle': 20, 'raita': 40,
+        'sabzi': 80, 'masala': 15, 'ghee': 120, 'coconut': 160, 'tea': 2,
+        
+        # Additional common foods
+        'toast': 80, 'cereal': 110, 'oats': 150, 'soup': 60, 'sandwich': 200
     }
     
     meals_lower = meals_text.lower()
