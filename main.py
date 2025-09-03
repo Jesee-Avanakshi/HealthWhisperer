@@ -736,10 +736,10 @@ def dashboard():
         <div class="card">
             <h2>📊 Your Mood Insights</h2>
             {% if mood_counts %}
-            <div style="width: 100%; height: 300px; margin: 20px 0;">
+            <div style="width: 100%; height: 320px; margin: 25px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                 <canvas id="moodChart"></canvas>
             </div>
-            <div style="width: 100%; height: 300px; margin: 20px 0;">
+            <div style="width: 100%; height: 320px; margin: 25px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                 <canvas id="moodTrendChart"></canvas>
             </div>
             {% else %}
@@ -762,16 +762,18 @@ def dashboard():
                 datasets: [{
                     data: {{ mood_counts.values() | list | tojson }},
                     backgroundColor: [
-                        '#2ECC71', // Positive - Green
-                        '#E74C3C', // Stressed - Red  
-                        '#F39C12', // Anxious - Orange
-                        '#3498DB', // Sad - Blue
-                        '#9B59B6', // Tired - Purple
-                        '#E67E22', // Frustrated - Dark Orange
-                        '#95A5A6'  // Neutral - Gray
+                        '#A8E6CF', // Positive - Soft Mint Green
+                        '#FFB3BA', // Stressed - Soft Pink  
+                        '#FFD1A9', // Anxious - Soft Peach
+                        '#B8C6E8', // Sad - Soft Lavender Blue
+                        '#E4C1F9', // Tired - Soft Purple
+                        '#FFC9A9', // Frustrated - Soft Orange
+                        '#D4C4E0'  // Neutral - Soft Gray Purple
                     ],
-                    borderWidth: 2,
-                    borderColor: 'rgba(255,255,255,0.2)'
+                    borderWidth: 3,
+                    borderColor: 'rgba(255,255,255,0.4)',
+                    hoverBorderWidth: 4,
+                    hoverBorderColor: 'rgba(255,255,255,0.8)'
                 }]
             },
             options: {
@@ -785,7 +787,14 @@ def dashboard():
                         font: { size: 16 }
                     },
                     legend: {
-                        labels: { color: 'white' }
+                        labels: { 
+                            color: 'white',
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 20,
+                            font: { size: 13 }
+                        },
+                        position: 'bottom'
                     }
                 }
             }
@@ -794,13 +803,13 @@ def dashboard():
         // Mood timeline chart (Line)
         const trendCtx = document.getElementById('moodTrendChart').getContext('2d');
         const moodColors = {
-            'Positive': '#2ECC71',
-            'Stressed': '#E74C3C', 
-            'Anxious': '#F39C12',
-            'Sad': '#3498DB',
-            'Tired': '#9B59B6',
-            'Frustrated': '#E67E22',
-            'Neutral': '#95A5A6'
+            'Positive': '#A8E6CF',
+            'Stressed': '#FFB3BA', 
+            'Anxious': '#FFD1A9',
+            'Sad': '#B8C6E8',
+            'Tired': '#E4C1F9',
+            'Frustrated': '#FFC9A9',
+            'Neutral': '#D4C4E0'
         };
         
         const timelineData = {{ mood_timeline | tojson }};
@@ -820,14 +829,16 @@ def dashboard():
                 datasets: [{
                     label: 'Mood Trend',
                     data: moodValues,
-                    borderColor: '#2ECC71',
-                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                    borderColor: '#A8E6CF',
+                    backgroundColor: 'rgba(168, 230, 207, 0.2)',
                     tension: 0.4,
                     fill: true,
                     pointBackgroundColor: moods.map(mood => moodColors[mood]),
                     pointBorderColor: 'white',
-                    pointBorderWidth: 2,
-                    pointRadius: 6
+                    pointBorderWidth: 3,
+                    pointRadius: 7,
+                    pointHoverRadius: 10,
+                    pointHoverBorderWidth: 4
                 }]
             },
             options: {
@@ -841,7 +852,13 @@ def dashboard():
                         font: { size: 16 }
                     },
                     legend: {
-                        labels: { color: 'white' }
+                        labels: { 
+                            color: 'white',
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 15,
+                            font: { size: 12 }
+                        }
                     }
                 },
                 scales: {
