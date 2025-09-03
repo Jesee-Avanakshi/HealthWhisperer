@@ -54,15 +54,10 @@ def home():
     
     <script>
         function openStreamlit() {
-            // Try different URLs to access Streamlit
-            const urls = [
-                window.location.origin.replace(':5000', ':8501'),
-                window.location.protocol + '//' + window.location.hostname + ':8501',
-                'https://workspace-replit-dev.replit-deploy.repl.co:8501/'
-            ];
-            
-            // Open in current window
-            window.location.href = urls[1];
+            // Direct access to Streamlit port
+            const currentUrl = new URL(window.location.href);
+            const streamlitUrl = `${currentUrl.protocol}//${currentUrl.hostname}:8501/`;
+            window.location.href = streamlitUrl;
         }
         
         // Auto redirect after 3 seconds

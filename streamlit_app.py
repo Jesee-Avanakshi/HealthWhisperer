@@ -24,15 +24,32 @@ st.set_page_config(
 @st.cache_resource
 def get_gemini_client():
     """Initialize Gemini client with API key"""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        st.error("GEMINI_API_KEY environment variable is required. Please set it in the Secrets tab.")
-        st.stop()
-    return genai.Client(api_key=api_key)
+    try:
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            st.warning("⚠️ GEMINI_API_KEY not found. AI suggestions will use fallback responses.")
+            return None
+        return genai.Client(api_key=api_key)
+    except Exception as e:
+        st.warning(f"⚠️ Could not initialize AI client: {e}. Using fallback responses.")
+        return None
 
 # Wellness suggestion functions
 def get_wellness_suggestion(mood_input, client):
     """Generate AI-powered wellness suggestions using Gemini"""
+    if client is None:
+        # Fallback suggestions when AI client is not available
+        fallback_suggestions = [
+            "Take five deep breaths and stretch for two minutes to release tension.",
+            "Step outside for a short walk and notice three beautiful things around you.",
+            "Try the 4-7-8 breathing technique: breathe in for 4, hold for 7, exhale for 8.",
+            "Take a moment to write down three things you're grateful for today.",
+            "Put on your favorite song and dance or move your body for 3 minutes.",
+            "Drink a glass of water slowly and mindfully, focusing on the sensation."
+        ]
+        import random
+        return random.choice(fallback_suggestions)
+    
     try:
         prompt = f"""You are a compassionate AI wellness coach. Based on the user's mood or feelings, 
         provide a short, actionable wellness suggestion (1-3 sentences). Focus on practical, immediate actions 
