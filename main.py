@@ -91,12 +91,12 @@ def get_wellness_suggestion(mood_input):
     # Positive/Grateful responses
     if any(word in mood_lower for word in ['grateful', 'thankful', 'blessed', 'good', 'positive', 'happy', 'great', 'wonderful', 'amazing', 'excited', 'joyful']):
         positive_suggestions = [
-            "That's wonderful! Keep nurturing this positive energy by writing down three things you're grateful for today.",
-            "Your gratitude is beautiful! Consider sharing your positive energy with someone you care about today.",
-            "Keep going - you're doing great! Take a moment to celebrate this good feeling and remember what brought it about.",
-            "Your positive mindset is powerful! Try doing something kind for yourself or others to maintain this beautiful energy.",
-            "Amazing! When we feel grateful, it's the perfect time to set positive intentions for the rest of your day.",
-            "Your gratitude is contagious! Consider reaching out to someone who has made a positive impact in your life."
+            "That's wonderful! Keep going - you're doing great! This positive energy will carry you through the day.",
+            "I love that you're feeling grateful! Take a moment to really savor this good feeling.",
+            "Keep up the great work! When we feel positive, it's the perfect time to tackle something we've been putting off.",
+            "Your positive mindset is powerful! Use this energy to do something that makes you feel even better.",
+            "Amazing! Ride this wave of positivity - maybe treat yourself to something you enjoy today.",
+            "That's fantastic! Your gratitude shows real wisdom. Keep nurturing this beautiful perspective."
         ]
         return random.choice(positive_suggestions)
     

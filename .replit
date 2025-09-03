@@ -38,4 +38,4 @@ localPort = 8501
 externalPort = 3000
 
 [agent]
-integrations = ["python_log_in_with_replit==1.0.0", "python_database==1.0.0"]
+integrations = ["python_database==1.0.0", "python_log_in_with_replit==1.0.0"]
