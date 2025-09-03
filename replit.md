@@ -1,6 +1,14 @@
 # Overview
 
-Health Whisperer is an AI-powered wellness coaching web application that provides personalized mental health suggestions based on user mood input. The application uses Google's Gemini AI model to generate compassionate, actionable wellness recommendations tailored to how users are feeling in real-time. Users can describe their emotions through text input or dropdown selections, receive AI-generated suggestions, and track their wellness journey over time through a history feature built with Streamlit.
+Health Whisperer is an AI-powered wellness coaching web application that provides personalized mental health suggestions based on user mood input. The application now features complete user authentication, allowing individual users to track their wellness journey separately. Users can sign up for accounts, log in securely, describe their emotions, receive personalized wellness suggestions, and maintain their own private wellness history over time.
+
+# Recent Changes
+
+**September 3, 2025**: Migrated from Streamlit to Flask with full user authentication system
+- Implemented user signup and login functionality with secure password hashing
+- Added PostgreSQL database integration for user management and wellness tracking
+- Created individual user dashboards and personalized wellness histories
+- Fixed database connection pooling for stable operation
 
 # User Preferences
 
@@ -9,43 +17,49 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Frontend Architecture
-- **Framework**: Streamlit for rapid web app development with built-in UI components
-- **UI Design**: Clean, wellness-focused design with custom CSS styling and calming color palette (sea green primary, slate gray secondary)
-- **User Interface**: Interactive sidebar navigation, responsive layout with multi-column designs
-- **Pages**: Home landing page, mood input form, suggestion display, and history tracking
-- **Client-side**: Streamlit's built-in interactivity with session state management
+- **Framework**: Flask with server-side rendered templates for reliable web application delivery
+- **UI Design**: Clean, wellness-focused design with custom CSS styling and beautiful gradient backgrounds
+- **User Interface**: Responsive design with landing page, authentication forms, dashboard, and wellness tracking
+- **Pages**: Landing page with signup/login, user dashboard, mood check-in form, suggestion display, and personal history
+- **Authentication Flow**: Secure user registration and login with session management
 
 ## Backend Architecture
-- **Web Framework**: Streamlit application with single-file architecture
-- **Application Structure**: Modular functions for different pages and AI integration within streamlit_app.py
-- **Session Management**: Streamlit session state with unique session IDs for anonymous users
-- **Error Handling**: Graceful fallbacks for AI service failures with default wellness suggestions
+- **Web Framework**: Flask application with user authentication and session management
+- **Application Structure**: Single-file Flask app (main.py) with modular route handling
+- **Authentication System**: Flask-Login with secure password hashing using Werkzeug
+- **Session Management**: Flask sessions with login state tracking for authenticated users
+- **Error Handling**: Graceful fallbacks for AI service failures and database connection issues
 
 ## Data Storage Solutions
-- **Primary Storage**: CSV file-based logging system using pandas for data persistence
-- **Data Structure**: CSV with columns for Timestamp, Session_ID, Mood_Input, and AI_Suggestion
-- **Data Processing**: Pandas for CSV data manipulation, filtering, and display formatting
-- **Session Tracking**: Unique session IDs generated with datetime stamps for user separation
+- **Primary Storage**: PostgreSQL database with SQLAlchemy ORM for reliable data persistence
+- **User Management**: User model with username, email, hashed passwords, and creation timestamps
+- **Wellness Tracking**: WellnessInteraction model linking users to their mood inputs and AI suggestions
+- **Database Configuration**: Connection pooling with pre-ping and connection recycling for stability
+- **Data Relationships**: One-to-many relationship between users and their wellness interactions
 
 ## Authentication and Authorization
-- **Current State**: Anonymous session-based tracking using Streamlit session state
-- **Session Management**: Auto-generated session IDs for tracking user interactions across page visits
-- **Privacy**: No user authentication required, maintaining user privacy and ease of access
+- **User Authentication**: Complete signup and login system with secure password hashing
+- **Session Management**: Flask-Login integration for user session tracking across requests
+- **Privacy**: Individual user accounts with private wellness histories
+- **Security**: Protected routes requiring login, password validation, and duplicate account prevention
 
 ## External Dependencies
 
-### AI Service Integration
-- **Google Gemini API**: Gemini-2.5-flash model integration for generating wellness suggestions
-- **API Client**: Google GenAI Python client library for API communication
-- **Response Format**: Direct text responses from Gemini for natural wellness suggestions
-- **Fallback System**: Default suggestions when AI service is unavailable
+### Database Integration
+- **PostgreSQL**: Replit's built-in PostgreSQL database for user and interaction storage
+- **SQLAlchemy**: ORM for database operations with Flask-SQLAlchemy integration
+- **Connection Management**: Pool recycling and pre-ping for stable database connections
 
-### Third-party Libraries
-- **Streamlit**: Web application framework with built-in UI components and state management
-- **Data Processing**: Pandas for CSV data manipulation and datetime formatting
-- **AI Integration**: google-genai library for Gemini API communication
-- **Data Types**: Pydantic for structured data validation (BaseModel import)
+### Authentication Libraries
+- **Flask-Login**: User session management and authentication state tracking
+- **Werkzeug Security**: Password hashing and verification for secure user authentication
+
+### AI Service Integration (Future Enhancement)
+- **Google Gemini API**: Available for integration with GEMINI_API_KEY environment variable
+- **Fallback System**: Built-in wellness suggestions when AI service is unavailable
+- **Response Format**: Random selection from curated wellness suggestions library
 
 ### Environment Configuration
-- **Gemini API Key**: Required GEMINI_API_KEY environment variable for AI service access
-- **Port Configuration**: Streamlit configured to run on port 5000 with 0.0.0.0 binding for Replit compatibility
+- **Database URL**: PostgreSQL connection via DATABASE_URL environment variable
+- **Session Secret**: Flask session secret key via SESSION_SECRET environment variable
+- **Port Configuration**: Flask configured to run on port 5000 with 0.0.0.0 binding for Replit compatibility
