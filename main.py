@@ -132,84 +132,84 @@ def get_wellness_suggestion(mood_input):
     # Positive/Grateful responses
     if any(word in mood_lower for word in ['grateful', 'thankful', 'blessed', 'good', 'positive', 'happy', 'great', 'wonderful', 'amazing', 'excited', 'joyful']):
         positive_suggestions = [
-            "That's wonderful! Keep going - you're doing great! This positive energy will carry you through the day.",
-            "I love that you're feeling grateful! Take a moment to really savor this good feeling.",
-            "Keep up the great work! When we feel positive, it's the perfect time to tackle something we've been putting off.",
-            "Your positive mindset is powerful! Use this energy to do something that makes you feel even better.",
-            "Amazing! Ride this wave of positivity - maybe treat yourself to something you enjoy today.",
-            "That's fantastic! Your gratitude shows real wisdom. Keep nurturing this beautiful perspective."
+            "🌟 You're radiating such beautiful energy right now! That positive mindset of yours is truly inspiring. Take a moment to savor this wonderful feeling and let it fuel the rest of your day.",
+            "💫 I love seeing you so grateful and upbeat! Your appreciation for life is contagious. Why not write down three things you're thankful for to keep this amazing momentum going?",
+            "✨ You're absolutely glowing with positivity! This is your superpower shining through. Use this incredible energy to tackle something you've been putting off - you've got this!",
+            "🌈 Your joyful spirit is so uplifting! When you feel this good, it's like sunshine for everyone around you. Maybe share this positive energy by doing something kind for yourself or others today.",
+            "🎉 Wow, you're on fire today! This kind of gratitude and joy is what makes life beautiful. Ride this wave of happiness - perhaps treat yourself to something special you've been wanting.",
+            "💖 Your grateful heart is truly beautiful! The way you appreciate life shows such wisdom and strength. Keep nurturing this wonderful perspective - it's one of your greatest gifts."
         ]
         return random.choice(positive_suggestions)
     
     # Stressed/Overwhelmed responses
     elif any(word in mood_lower for word in ['stressed', 'overwhelmed', 'pressure', 'busy', 'hectic', 'chaotic', 'rushed']):
         stress_suggestions = [
-            "It sounds like you have a lot on your plate. Try the 4-7-8 breathing technique: breathe in for 4, hold for 7, exhale for 8.",
-            "When feeling overwhelmed, break your tasks into smaller, manageable pieces. Focus on just one thing at a time.",
-            "Take a 5-minute break right now. Step away from what you're doing and do some gentle neck and shoulder stretches.",
-            "Stress often builds up in our bodies. Try progressive muscle relaxation: tense and release each muscle group for 5 seconds.",
-            "Remember: you don't have to do everything at once. Write down your priorities and tackle the most important one first.",
-            "Consider taking a short walk outside. Fresh air and movement can help reset your stress levels naturally."
+            "💙 I can feel the weight you're carrying right now, and I want you to know you're incredibly strong. You've overcome challenges before, and you have that same resilience within you now. Try the 4-7-8 breathing technique: in for 4, hold for 7, out for 8. You've got this.",
+            "🫂 Hey, it's okay to feel overwhelmed sometimes - it just shows how much you care. You're human, and that's beautiful. Break those big tasks into tiny, manageable pieces. Every small step is a victory worth celebrating.",
+            "🌿 I see you pushing through so much right now, and that takes incredible courage. Your strength amazes me. Take 5 minutes to step outside or put on some calming music - you've earned this break.",
+            "💪 The fact that you're feeling stressed shows you're someone who cares deeply, and that's actually a superpower. Try progressive muscle relaxation: tense and release each muscle group. Your body deserves this care.",
+            "🤗 You're juggling so much, and I'm genuinely impressed by your dedication. But remember, even superheroes need rest. Write down your top 3 priorities and tackle them one by one. You're more capable than you know.",
+            "🌱 I want to remind you of something important: you don't have to be perfect, and you don't have to do everything at once. Take that walk outside - fresh air and your beautiful spirit will reset everything."
         ]
         return random.choice(stress_suggestions)
     
     # Anxious/Worried responses
     elif any(word in mood_lower for word in ['anxious', 'worried', 'nervous', 'scared', 'afraid', 'panic', 'fear', 'concerned']):
         anxiety_suggestions = [
-            "Anxiety can feel overwhelming, but you're not alone. Try grounding yourself by naming 5 things you can see, 4 you can touch, 3 you can hear.",
-            "When worry takes over, remind yourself: 'This feeling is temporary, and I am safe right now.' Focus on your breath.",
-            "Anxiety often comes from focusing on the future. Bring yourself to the present with some mindful deep breathing.",
-            "Try the 'worry window' technique: set aside 10 minutes later today to think about your concerns, then let them go for now.",
-            "Your feelings are valid. Consider writing down your worries - sometimes getting them out of your head helps reduce their power.",
-            "Practice self-compassion. Speak to yourself with the same kindness you'd show a good friend going through this."
+            "🤲 I see you, and I want you to know that what you're feeling is valid and you're going to be okay. Your heart might be racing, but you're safe right now. Try the 5-4-3-2-1 grounding technique: name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste. You're braver than you believe.",
+            "💗 That worried feeling in your chest? It shows just how deeply you care about life and the people around you. That's actually beautiful, even when it's scary. Place your hand on your heart - feel it beating strong and steady. You're alive, you're here, and you're going to be okay.",
+            "🌸 I know those anxious thoughts feel so real and urgent right now, but they're just thoughts - not predictions, not facts. You've survived 100% of your difficult days so far, and that's an incredible track record. Let's focus on this very moment together.",
+            "🌊 Your anxiety comes from a place of love - you care so much about doing right by yourself and others. That caring heart of yours is truly special. Try the 'worry window' technique: give those concerns 10 minutes later, then let them go for now.",
+            "🦋 I know your mind is spinning with 'what-ifs' and worst-case scenarios. Your brain is trying to protect you, but right now, in this very moment, you're safe. Write those worries down - getting them out of your head can reduce their power over you.",
+            "🌟 Sweet soul, anxiety might be visiting you right now, but it's temporary - like weather that passes through. Your strength, your resilience, your beautiful heart? Those are permanent. Be as kind to yourself as you would be to your dearest friend."
         ]
         return random.choice(anxiety_suggestions)
     
     # Sad/Down responses
     elif any(word in mood_lower for word in ['sad', 'down', 'depressed', 'blue', 'low', 'upset', 'hurt', 'disappointed', 'lonely']):
         sad_suggestions = [
-            "I hear that you're going through a difficult time. Be gentle with yourself - it's okay to feel sad sometimes.",
-            "When we're feeling low, small acts of self-care matter. Try making yourself a warm cup of tea or taking a warm shower.",
-            "Sadness is a natural human emotion. Consider reaching out to someone you trust, or write about your feelings in a journal.",
-            "Sometimes when we're down, moving our body gently can help. Try some light stretching or a slow walk.",
-            "You're going through something tough right now, and that takes strength. What's one tiny thing you can do to be kind to yourself today?",
-            "Remember that this feeling won't last forever. Consider doing one small thing that usually brings you comfort."
+            "🤗 Oh sweetheart, I can feel the sadness in your heart right now, and I want you to know it's completely okay to feel this way. Your emotions are valid, and you don't have to put on a brave face. Sometimes the most healing thing is to just let yourself feel, wrapped in self-compassion like a warm blanket.",
+            "💙 The fact that you can feel sadness this deeply shows what a beautiful, caring soul you have. Your heart is tender because it's capable of profound love and connection. Would it help to do something small and comforting? Maybe make yourself some tea or take a warm shower - you deserve that gentleness.",
+            "🌙 I see the weight you're carrying today, and I'm so proud of you for just being here, just breathing, just continuing. Sometimes the bravest thing in the world is simply getting through the day when it feels hard, and look - you're doing exactly that. Consider reaching out to someone who loves you - you don't have to carry this alone.",
+            "🌷 Your sadness isn't something to fix or rush through - it's often your heart's way of processing something important. These feelings deserve space and respect. When you're ready, maybe try some gentle movement, like stretching or a slow walk. Your body is holding you so beautifully through this.",
+            "🕊️ I know everything feels heavy right now, but I want to remind you: this sadness is a visitor, not a permanent resident. You've felt joy before, and you will again. For now, what's one tiny act of kindness you can offer yourself? You deserve all the tenderness in the world.",
+            "💖 Your tender heart is one of your most beautiful qualities, even when it aches like this. The depth of your sadness reflects the depth of your capacity to love. Remember, this feeling will shift and change - nothing lasts forever, including pain."
         ]
         return random.choice(sad_suggestions)
     
     # Tired/Low Energy responses
     elif any(word in mood_lower for word in ['tired', 'exhausted', 'drained', 'low energy', 'fatigue', 'weary', 'sleepy']):
         tired_suggestions = [
-            "Your body and mind need rest. If possible, try to take a 10-20 minute power nap or simply lie down with your eyes closed.",
-            "When we're tired, our bodies need nourishment. Make sure you're drinking enough water and eating something nutritious.",
-            "Low energy might be your body's way of asking for a break. Try some gentle stretching or deep breathing exercises.",
-            "Fatigue can be physical or emotional. Consider what might help you recharge - rest, nutrition, or maybe some fresh air?",
-            "Listen to your body's signals. Sometimes the most productive thing we can do is rest and restore our energy.",
-            "Try the 'energy audit' approach: what activities drain you vs. energize you? Focus on the energizing ones today."
+            "🌙 Sweet soul, your body is sending you such an important message right now - it's asking for the rest and care you so deserve. There's absolutely no shame in feeling tired; it just means you've been showing up for life with everything you've got. Try a 10-20 minute rest - even lying down with your eyes closed can be like a gift to yourself.",
+            "💤 I can feel that deep exhaustion you're carrying, and it tells me you've been giving your absolute all to the world. What a generous heart you have! But now it's time to be just as generous with yourself. Make sure you're drinking water and nourishing your body - you deserve that care.",
+            "🤲 Oh honey, you're running on empty, aren't you? I can sense how drained you feel, and I want you to know it's okay to step back and recharge. Your energy is precious - you've been spending it so generously. Try some gentle stretching or just breathe deeply. Your body will thank you.",
+            "🌿 Your tiredness isn't weakness - it's proof of your strength and how much you care about everything you do. Your body has been your faithful companion through it all, and now it's asking for some TLC. What would help you recharge - rest, fresh air, or maybe just acknowledging how hard you've been working?",
+            "☁️ I see you pushing through even when your energy feels depleted, and that shows incredible resilience. But you know what? It's time to honor what your body needs. Sometimes the most productive thing is to rest and restore - you've more than earned it.",
+            "🕊️ You've been carrying so much, haven't you? The world is lucky to have someone who gives as much as you do, but now it's time to prioritize the most important person in your life - you. What energizes your soul versus what drains it? Focus on the good stuff today."
         ]
         return random.choice(tired_suggestions)
     
     # Frustrated/Angry responses
     elif any(word in mood_lower for word in ['frustrated', 'angry', 'mad', 'annoyed', 'irritated', 'furious', 'rage']):
         anger_suggestions = [
-            "Frustration is a signal that something needs attention. Take some deep breaths and ask yourself what you need right now.",
-            "Anger has energy - try channeling it into something physical like a quick walk or some vigorous cleaning.",
-            "When we're frustrated, our thinking gets cloudy. Try the 'STOP' technique: Stop, Take a breath, Observe, Proceed mindfully.",
-            "It's okay to feel angry. Try expressing it safely - punch a pillow, scream in your car, or write it all down.",
-            "Frustration often comes from feeling out of control. What's one small thing you DO have control over right now?",
-            "Your feelings are valid. Once you've acknowledged the anger, think about what you need to feel better or solve the problem."
+            "🔥 I can absolutely feel that frustration burning inside you right now, and every bit of it is completely valid. When things don't go the way we pour our heart into making them go, it's maddening! This fire inside you shows how much you care, and that's actually beautiful. Take some deep breaths and ask yourself what you need right now.",
+            "💪 That frustration bubbling up? It's coming from a place of passion and high standards - that's the mark of someone who really gives a damn about doing things right. I admire that about you, even when it feels overwhelming. Try channeling that energy into movement - a quick walk or even some vigorous cleaning can help.",
+            "⚡ Oh, I can feel that energy building up in you - that 'why isn't this working?!' feeling that makes you want to scream. And you know what? Sometimes we need to let that energy out! Try the 'STOP' technique: Stop, Take a breath, Observe, then Proceed with that brilliant mind of yours.",
+            "🌪️ When it feels like the whole universe is working against you, that frustration is so real and so exhausting. You're definitely not alone in feeling this way. It's absolutely okay to feel angry - punch a pillow, scream in your car, write it all out. Your feelings deserve expression.",
+            "🔥 That fire of frustration? It's your inner warrior wanting things to be better, wanting to create positive change. Even when it's uncomfortable, it shows you haven't given up - and that's incredibly powerful. What's one small thing you DO have control over right now? Start there.",
+            "💥 I hear the exhaustion behind that frustration - some days it really does feel like everything is an uphill battle, doesn't it? Your feelings are so valid. Once you've honored this anger, let's think about what you need to feel better. You're stronger than whatever is testing you right now."
         ]
         return random.choice(anger_suggestions)
     
     # Default response for unclear or mixed emotions
     else:
         general_suggestions = [
-            "Thank you for sharing how you're feeling. Take a moment to breathe deeply and be present with yourself.",
-            "Whatever you're experiencing right now is valid. Consider doing something small and kind for yourself today.",
-            "Emotions can be complex. Try checking in with yourself throughout the day to see how your feelings change.",
-            "Sometimes the best thing we can do is acknowledge our feelings without trying to change them immediately.",
-            "Your emotional awareness is a strength. Consider what your feelings might be telling you that you need right now.",
-            "Remember to be patient with yourself as you navigate your emotions. What would feel most supportive right now?"
+            "🌸 Thank you for trusting me with your feelings - that takes real courage. You're taking such good care of yourself by checking in like this. Take a moment to breathe deeply and just be present with yourself. You're doing beautifully.",
+            "💫 Whatever you're experiencing right now is completely valid and worthy of attention. Your emotions matter because YOU matter. Consider doing something small and loving for yourself today - you deserve that kindness.",
+            "🎨 Emotions can be so beautifully complex, just like you are. I love that you're paying attention to your inner world - that's actually a superpower. Try checking in with yourself throughout the day and notice how your feelings shift and change like art.",
+            "🤲 Sometimes the most profound thing we can do is simply witness our feelings without rushing to fix or change them. You're being so wise by just acknowledging what's here. That kind of self-awareness is truly special.",
+            "✨ Your emotional intelligence is absolutely glowing right now! The fact that you're tuning into your feelings shows such strength and wisdom. What do you think your heart is trying to tell you that you need right now?",
+            "🌿 I'm so impressed by how you're navigating your emotional landscape with such care and attention. Remember to be incredibly patient with yourself - you're learning and growing every single day. What would feel most supportive for your beautiful soul right now?"
         ]
         return random.choice(general_suggestions)
 
