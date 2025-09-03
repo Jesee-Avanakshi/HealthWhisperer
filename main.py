@@ -717,7 +717,7 @@ def check_in():
 </head>
 <body>
     <div class="container">
-        <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+        <a href="{{ url_for('dashboard') }}" class="back-link">← Back to Dashboard</a>
         
         <div class="card">
             <h1>💭 How are you feeling today?</h1>
@@ -855,7 +855,7 @@ def suggestion():
 </head>
 <body>
     <div class="container">
-        <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+        <a href="{{ url_for('dashboard') }}" class="back-link">← Back to Dashboard</a>
         
         <div class="card">
             <h1>✨ Your Personalized Wellness Suggestion</h1>
