@@ -121,41 +121,107 @@ def analyze_food_intake(meals_text, water_glasses):
     import json
     import re
     
-    # Comprehensive calorie estimation including Indian foods
-    food_calories = {
+    # Comprehensive nutritional database: {calories, protein(g), carbs(g), fiber(g)}
+    food_nutrition = {
         # Basic foods
-        'rice': 130, 'bread': 80, 'pasta': 220, 'quinoa': 220,
-        'chicken': 165, 'beef': 250, 'fish': 130, 'egg': 70, 'tofu': 70,
-        'apple': 80, 'banana': 105, 'orange': 60, 'berries': 40,
-        'salad': 20, 'vegetables': 25, 'potato': 160, 'sweet potato': 180,
-        'milk': 150, 'yogurt': 100, 'cheese': 110, 'nuts': 180,
-        'pizza': 285, 'burger': 540, 'fries': 365, 'soda': 140,
-        'chocolate': 235, 'cake': 240, 'cookie': 50,
+        'rice': {'cal': 130, 'protein': 2.7, 'carbs': 28, 'fiber': 0.4},
+        'bread': {'cal': 80, 'protein': 4, 'carbs': 14, 'fiber': 2},
+        'pasta': {'cal': 220, 'protein': 8, 'carbs': 44, 'fiber': 2.5},
+        'quinoa': {'cal': 220, 'protein': 8, 'carbs': 39, 'fiber': 5},
+        
+        # Proteins
+        'chicken': {'cal': 165, 'protein': 31, 'carbs': 0, 'fiber': 0},
+        'beef': {'cal': 250, 'protein': 26, 'carbs': 0, 'fiber': 0},
+        'fish': {'cal': 130, 'protein': 26, 'carbs': 0, 'fiber': 0},
+        'egg': {'cal': 70, 'protein': 6, 'carbs': 0.6, 'fiber': 0},
+        'tofu': {'cal': 70, 'protein': 8, 'carbs': 2, 'fiber': 1},
+        
+        # Fruits
+        'apple': {'cal': 80, 'protein': 0.3, 'carbs': 21, 'fiber': 4},
+        'banana': {'cal': 105, 'protein': 1.3, 'carbs': 27, 'fiber': 3},
+        'orange': {'cal': 60, 'protein': 1.2, 'carbs': 15, 'fiber': 3},
+        'berries': {'cal': 40, 'protein': 0.5, 'carbs': 10, 'fiber': 4},
+        
+        # Vegetables
+        'salad': {'cal': 20, 'protein': 2, 'carbs': 4, 'fiber': 2},
+        'vegetables': {'cal': 25, 'protein': 2, 'carbs': 5, 'fiber': 3},
+        'potato': {'cal': 160, 'protein': 4, 'carbs': 37, 'fiber': 4},
+        'sweet potato': {'cal': 180, 'protein': 4, 'carbs': 41, 'fiber': 7},
+        
+        # Dairy
+        'milk': {'cal': 150, 'protein': 8, 'carbs': 12, 'fiber': 0},
+        'yogurt': {'cal': 100, 'protein': 10, 'carbs': 6, 'fiber': 0},
+        'cheese': {'cal': 110, 'protein': 7, 'carbs': 1, 'fiber': 0},
+        'nuts': {'cal': 180, 'protein': 6, 'carbs': 6, 'fiber': 3},
+        
+        # Processed foods
+        'pizza': {'cal': 285, 'protein': 12, 'carbs': 36, 'fiber': 2},
+        'burger': {'cal': 540, 'protein': 25, 'carbs': 40, 'fiber': 3},
+        'fries': {'cal': 365, 'protein': 4, 'carbs': 48, 'fiber': 4},
+        'soda': {'cal': 140, 'protein': 0, 'carbs': 39, 'fiber': 0},
+        'chocolate': {'cal': 235, 'protein': 3, 'carbs': 26, 'fiber': 3},
+        'cake': {'cal': 240, 'protein': 3, 'carbs': 35, 'fiber': 1},
+        'cookie': {'cal': 50, 'protein': 1, 'carbs': 7, 'fiber': 0.3},
         
         # Indian foods and ingredients
-        'pulao': 320, 'biryani': 350, 'dal': 180, 'curry': 200, 'roti': 120,
-        'chapati': 120, 'naan': 160, 'paratha': 200, 'samosa': 150, 'dosa': 170,
-        'idli': 40, 'vada': 80, 'upma': 140, 'poha': 130, 'khichdi': 160,
-        'soya': 120, 'chana': 110, 'aloo': 110, 'paneer': 180, 'curd': 60,
-        'lassi': 120, 'chai': 50, 'papad': 30, 'pickle': 20, 'raita': 40,
-        'sabzi': 80, 'masala': 15, 'ghee': 120, 'coconut': 160, 'tea': 2,
+        'pulao': {'cal': 320, 'protein': 8, 'carbs': 58, 'fiber': 3},
+        'biryani': {'cal': 350, 'protein': 12, 'carbs': 45, 'fiber': 2},
+        'dal': {'cal': 180, 'protein': 12, 'carbs': 30, 'fiber': 12},
+        'curry': {'cal': 200, 'protein': 8, 'carbs': 25, 'fiber': 4},
+        'roti': {'cal': 120, 'protein': 4, 'carbs': 22, 'fiber': 3},
+        'chapati': {'cal': 120, 'protein': 4, 'carbs': 22, 'fiber': 3},
+        'naan': {'cal': 160, 'protein': 5, 'carbs': 28, 'fiber': 2},
+        'paratha': {'cal': 200, 'protein': 5, 'carbs': 30, 'fiber': 3},
+        'samosa': {'cal': 150, 'protein': 4, 'carbs': 18, 'fiber': 2},
+        'dosa': {'cal': 170, 'protein': 6, 'carbs': 28, 'fiber': 2},
+        'idli': {'cal': 40, 'protein': 2, 'carbs': 8, 'fiber': 1},
+        'vada': {'cal': 80, 'protein': 3, 'carbs': 10, 'fiber': 2},
+        'upma': {'cal': 140, 'protein': 4, 'carbs': 25, 'fiber': 2},
+        'poha': {'cal': 130, 'protein': 3, 'carbs': 23, 'fiber': 2},
+        'khichdi': {'cal': 160, 'protein': 6, 'carbs': 30, 'fiber': 4},
+        'soya': {'cal': 120, 'protein': 11, 'carbs': 9, 'fiber': 4},
+        'chana': {'cal': 110, 'protein': 8, 'carbs': 18, 'fiber': 8},
+        'aloo': {'cal': 110, 'protein': 2, 'carbs': 25, 'fiber': 3},
+        'paneer': {'cal': 180, 'protein': 14, 'carbs': 3, 'fiber': 0},
+        'curd': {'cal': 60, 'protein': 4, 'carbs': 5, 'fiber': 0},
+        'lassi': {'cal': 120, 'protein': 6, 'carbs': 15, 'fiber': 0},
+        'chai': {'cal': 50, 'protein': 2, 'carbs': 8, 'fiber': 0},
+        'papad': {'cal': 30, 'protein': 1, 'carbs': 4, 'fiber': 1},
+        'pickle': {'cal': 20, 'protein': 0.5, 'carbs': 3, 'fiber': 1},
+        'raita': {'cal': 40, 'protein': 2, 'carbs': 4, 'fiber': 1},
+        'sabzi': {'cal': 80, 'protein': 3, 'carbs': 12, 'fiber': 4},
+        'masala': {'cal': 15, 'protein': 0.5, 'carbs': 3, 'fiber': 1},
+        'ghee': {'cal': 120, 'protein': 0, 'carbs': 0, 'fiber': 0},
+        'coconut': {'cal': 160, 'protein': 1.5, 'carbs': 7, 'fiber': 4},
+        'tea': {'cal': 2, 'protein': 0, 'carbs': 0.5, 'fiber': 0},
         
         # Additional common foods
-        'toast': 80, 'cereal': 110, 'oats': 150, 'soup': 60, 'sandwich': 200
+        'toast': {'cal': 80, 'protein': 4, 'carbs': 14, 'fiber': 2},
+        'cereal': {'cal': 110, 'protein': 3, 'carbs': 23, 'fiber': 3},
+        'oats': {'cal': 150, 'protein': 5, 'carbs': 27, 'fiber': 4},
+        'soup': {'cal': 60, 'protein': 3, 'carbs': 8, 'fiber': 2},
+        'sandwich': {'cal': 200, 'protein': 8, 'carbs': 30, 'fiber': 4}
     }
     
     meals_lower = meals_text.lower()
     total_calories = 0
+    total_protein = 0
+    total_carbs = 0
+    total_fiber = 0
     detected_foods = []
     
-    # Detect foods and estimate calories
-    for food, calories in food_calories.items():
+    # Detect foods and calculate all nutrients
+    for food, nutrition in food_nutrition.items():
         if food in meals_lower:
             detected_foods.append(food)
             # Estimate portion (simple logic)
             count = meals_lower.count(food)
             multiplier = 1.5 if any(word in meals_lower for word in ['large', 'big', 'extra', 'double']) else 1
-            total_calories += int(calories * count * multiplier)
+            # Calculate all nutrients
+            total_calories += int(nutrition['cal'] * count * multiplier)
+            total_protein += round(nutrition['protein'] * count * multiplier, 1)
+            total_carbs += round(nutrition['carbs'] * count * multiplier, 1)
+            total_fiber += round(nutrition['fiber'] * count * multiplier, 1)
     
     # Water intake analysis
     recommended_water = 8  # glasses
@@ -165,19 +231,44 @@ def analyze_food_intake(meals_text, water_glasses):
     recommended_calories = 2000  # Basic recommendation
     calorie_status = "high" if total_calories > recommended_calories else "good" if total_calories > 1200 else "low"
     
+    # Daily recommendations (general guidelines)
+    rec_protein = 50  # grams per day
+    rec_carbs = 225   # grams per day (45% of 2000 cal diet)
+    rec_fiber = 25    # grams per day
+    
+    # Macronutrient status
+    protein_status = "excellent" if total_protein >= rec_protein else "good" if total_protein >= rec_protein * 0.7 else "low"
+    carbs_status = "high" if total_carbs > rec_carbs * 1.3 else "good" if total_carbs >= rec_carbs * 0.5 else "low"
+    fiber_status = "excellent" if total_fiber >= rec_fiber else "good" if total_fiber >= rec_fiber * 0.6 else "low"
+    
     return {
         'total_calories': total_calories,
+        'total_protein': total_protein,
+        'total_carbs': total_carbs,
+        'total_fiber': total_fiber,
         'detected_foods': detected_foods,
         'water_status': water_status,
         'calorie_status': calorie_status,
+        'protein_status': protein_status,
+        'carbs_status': carbs_status,
+        'fiber_status': fiber_status,
+        'rec_protein': rec_protein,
+        'rec_carbs': rec_carbs,
+        'rec_fiber': rec_fiber,
         'recommended_water': recommended_water
     }
 
 def get_nutritional_advice(analysis_data, meals_text):
-    """Generate personalized nutritional advice based on food analysis"""
+    """Generate personalized nutritional advice based on comprehensive food analysis"""
     total_calories = analysis_data['total_calories']
+    total_protein = analysis_data.get('total_protein', 0)
+    total_carbs = analysis_data.get('total_carbs', 0)
+    total_fiber = analysis_data.get('total_fiber', 0)
     water_status = analysis_data['water_status']
     calorie_status = analysis_data['calorie_status']
+    protein_status = analysis_data.get('protein_status', 'unknown')
+    carbs_status = analysis_data.get('carbs_status', 'unknown')
+    fiber_status = analysis_data.get('fiber_status', 'unknown')
     detected_foods = analysis_data['detected_foods']
     meals_lower = meals_text.lower()
     
@@ -219,6 +310,42 @@ def get_nutritional_advice(analysis_data, meals_text):
     healthy_count = sum(1 for food in healthy_foods if food in detected_foods)
     unhealthy_count = sum(1 for food in unhealthy_foods if food in detected_foods)
     
+    # Protein analysis and advice
+    if protein_status == "low" and total_protein > 0:
+        advice.append(f"💪 You need more protein! You had {total_protein}g, aim for 50g daily:")
+        advice.append("• Add eggs, chicken, fish, or paneer to your meals")
+        advice.append("• Include dal, chana, soya, or other legumes")
+        advice.append("• Try Greek yogurt, nuts, or protein-rich snacks")
+    elif protein_status == "good" and total_protein > 0:
+        advice.append(f"👍 Good protein intake ({total_protein}g) - try to reach 50g for optimal health")
+    elif protein_status == "excellent" and total_protein > 0:
+        advice.append(f"💪 Excellent protein intake! You had {total_protein}g today.")
+    
+    # Fiber analysis and advice
+    if fiber_status == "low" and total_fiber > 0:
+        advice.append(f"🌾 You need more fiber! You had {total_fiber}g, aim for 25g daily:")
+        advice.append("• Add more fruits like apples, bananas, and berries")
+        advice.append("• Include vegetables, dal, and whole grains")
+        advice.append("• Try oats, quinoa, or brown rice instead of refined grains")
+    elif fiber_status == "good" and total_fiber > 0:
+        advice.append(f"👌 Decent fiber intake ({total_fiber}g) - aim for 25g for better digestion")
+    elif fiber_status == "excellent" and total_fiber > 0:
+        advice.append(f"🌾 Excellent fiber intake! You had {total_fiber}g today - great for digestion!")
+    
+    # Carbohydrate analysis and advice
+    if carbs_status == "high" and total_carbs > 0:
+        advice.append(f"🍞 High carb intake ({total_carbs}g) - try to balance:")
+        advice.append("• Choose complex carbs like brown rice and oats")
+        advice.append("• Add more protein and vegetables to balance meals")
+        advice.append("• Consider smaller portions of rice/bread")
+    elif carbs_status == "low" and total_carbs > 0:
+        advice.append(f"🍚 Low carb intake ({total_carbs}g) - your body needs energy:")
+        advice.append("• Add healthy carbs like oats, quinoa, or sweet potatoes")
+        advice.append("• Include fruits for natural sugars and energy")
+    elif carbs_status == "good" and total_carbs > 0:
+        advice.append(f"⚡ Good carb balance ({total_carbs}g) for sustained energy!")
+    
+    # Food quality advice
     if healthy_count > unhealthy_count:
         advice.append("🥗 I love seeing all those nutritious choices! Keep up the excellent eating habits.")
     elif unhealthy_count > 0:
@@ -1356,9 +1483,11 @@ def food_tracker():
             <p>Here's what I found about your food intake today</p>
         </div>
         <div class="nutrition-stats">
-            <div class="stat-card"><div class="stat-number">{{ analysis.total_calories }}</div><div>Total Calories</div></div>
-            <div class="stat-card"><div class="stat-number">{{ water_intake }}</div><div>Glasses of Water</div></div>
-            <div class="stat-card"><div class="stat-number">{{ analysis.detected_foods|length }}</div><div>Foods Detected</div></div>
+            <div class="stat-card"><div class="stat-number">{{ analysis.total_calories }}</div><div>Calories</div></div>
+            <div class="stat-card"><div class="stat-number">{{ analysis.total_protein }}g</div><div>Protein</div></div>
+            <div class="stat-card"><div class="stat-number">{{ analysis.total_carbs }}g</div><div>Carbs</div></div>
+            <div class="stat-card"><div class="stat-number">{{ analysis.total_fiber }}g</div><div>Fiber</div></div>
+            <div class="stat-card"><div class="stat-number">{{ water_intake }}</div><div>Water (glasses)</div></div>
         </div>
         <div class="card">
             <h2>🥗 Detected Foods</h2>
