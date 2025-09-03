@@ -84,6 +84,47 @@ def log_interaction(mood_input, suggestion, user_id):
         print(f"Error logging interaction: {e}")
         db.session.rollback()
 
+def get_mood_chart_data(user_id):
+    """Get mood data for chart visualization"""
+    interactions = WellnessInteraction.query.filter_by(user_id=user_id).order_by(WellnessInteraction.timestamp.desc()).limit(30).all()
+    
+    mood_counts = {}
+    mood_timeline = []
+    
+    for interaction in reversed(interactions):  # Reverse to show chronological order
+        mood_category = categorize_mood(interaction.mood_input)
+        
+        # Count mood categories
+        mood_counts[mood_category] = mood_counts.get(mood_category, 0) + 1
+        
+        # Timeline data (last 7 days)
+        mood_timeline.append({
+            'date': interaction.timestamp.strftime('%m/%d'),
+            'mood': mood_category,
+            'timestamp': interaction.timestamp
+        })
+    
+    return mood_counts, mood_timeline
+
+def categorize_mood(mood_input):
+    """Categorize mood input into chart-friendly categories"""
+    mood_lower = mood_input.lower()
+    
+    if any(word in mood_lower for word in ['grateful', 'thankful', 'blessed', 'good', 'positive', 'happy', 'great', 'wonderful', 'amazing', 'excited', 'joyful']):
+        return 'Positive'
+    elif any(word in mood_lower for word in ['stressed', 'overwhelmed', 'pressure', 'busy', 'hectic', 'chaotic', 'rushed']):
+        return 'Stressed'
+    elif any(word in mood_lower for word in ['anxious', 'worried', 'nervous', 'scared', 'afraid', 'panic', 'fear', 'concerned']):
+        return 'Anxious'
+    elif any(word in mood_lower for word in ['sad', 'down', 'depressed', 'blue', 'low', 'upset', 'hurt', 'disappointed', 'lonely']):
+        return 'Sad'
+    elif any(word in mood_lower for word in ['tired', 'exhausted', 'drained', 'low energy', 'fatigue', 'weary', 'sleepy']):
+        return 'Tired'
+    elif any(word in mood_lower for word in ['frustrated', 'angry', 'mad', 'annoyed', 'irritated', 'furious', 'rage']):
+        return 'Frustrated'
+    else:
+        return 'Neutral'
+
 def get_wellness_suggestion(mood_input):
     """Get contextual wellness suggestion based on mood input"""
     mood_lower = mood_input.lower()
@@ -562,6 +603,7 @@ def dashboard():
     """User dashboard"""
     interactions = WellnessInteraction.query.filter_by(user_id=current_user.id).order_by(WellnessInteraction.timestamp.desc()).limit(5).all()
     total_checkins = WellnessInteraction.query.filter_by(user_id=current_user.id).count()
+    mood_counts, mood_timeline = get_mood_chart_data(current_user.id)
     
     return render_template_string('''<!DOCTYPE html>
 <html lang="en">
@@ -691,20 +733,141 @@ def dashboard():
             <a href="{{ url_for('history') }}" class="btn">📊 View Full History</a>
         </div>
         
-        {% if interactions %}
         <div class="card">
-            <h2>Recent Check-ins</h2>
-            {% for interaction in interactions %}
-            <div class="recent-item">
-                <div class="timestamp">{{ interaction.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</div>
-                <strong>You felt:</strong> "{{ interaction.mood_input[:100] }}{% if interaction.mood_input|length > 100 %}...{% endif %}"
+            <h2>📊 Your Mood Insights</h2>
+            {% if mood_counts %}
+            <div style="width: 100%; height: 300px; margin: 20px 0;">
+                <canvas id="moodChart"></canvas>
             </div>
-            {% endfor %}
+            <div style="width: 100%; height: 300px; margin: 20px 0;">
+                <canvas id="moodTrendChart"></canvas>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: rgba(255,255,255,0.8); margin: 40px 0;">
+                📈 Your mood chart will appear here after you complete a few check-ins!
+            </p>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Mood distribution chart (Doughnut)
+        {% if mood_counts %}
+        const moodCtx = document.getElementById('moodChart').getContext('2d');
+        new Chart(moodCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ mood_counts.keys() | list | tojson }},
+                datasets: [{
+                    data: {{ mood_counts.values() | list | tojson }},
+                    backgroundColor: [
+                        '#2ECC71', // Positive - Green
+                        '#E74C3C', // Stressed - Red  
+                        '#F39C12', // Anxious - Orange
+                        '#3498DB', // Sad - Blue
+                        '#9B59B6', // Tired - Purple
+                        '#E67E22', // Frustrated - Dark Orange
+                        '#95A5A6'  // Neutral - Gray
+                    ],
+                    borderWidth: 2,
+                    borderColor: 'rgba(255,255,255,0.2)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Your Mood Distribution',
+                        color: 'white',
+                        font: { size: 16 }
+                    },
+                    legend: {
+                        labels: { color: 'white' }
+                    }
+                }
+            }
+        });
+        
+        // Mood timeline chart (Line)
+        const trendCtx = document.getElementById('moodTrendChart').getContext('2d');
+        const moodColors = {
+            'Positive': '#2ECC71',
+            'Stressed': '#E74C3C', 
+            'Anxious': '#F39C12',
+            'Sad': '#3498DB',
+            'Tired': '#9B59B6',
+            'Frustrated': '#E67E22',
+            'Neutral': '#95A5A6'
+        };
+        
+        const timelineData = {{ mood_timeline | tojson }};
+        const dates = timelineData.map(item => item.date);
+        const moods = timelineData.map(item => item.mood);
+        
+        // Convert mood categories to numeric values for line chart
+        const moodValues = moods.map(mood => {
+            const moodScale = {'Positive': 5, 'Neutral': 3, 'Tired': 2, 'Anxious': 2, 'Stressed': 1, 'Frustrated': 1, 'Sad': 1};
+            return moodScale[mood] || 3;
+        });
+        
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Mood Trend',
+                    data: moodValues,
+                    borderColor: '#2ECC71',
+                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: moods.map(mood => moodColors[mood]),
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Your Mood Timeline',
+                        color: 'white',
+                        font: { size: 16 }
+                    },
+                    legend: {
+                        labels: { color: 'white' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            color: 'white',
+                            callback: function(value) {
+                                const labels = {1: 'Low', 2: 'Tired', 3: 'Neutral', 4: 'Good', 5: 'Great'};
+                                return labels[value] || '';
+                            }
+                        },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    x: {
+                        ticks: { color: 'white' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
+                }
+            }
+        });
+        {% endif %}
+    </script>
 </body>
-</html>''', total_checkins=total_checkins, interactions=interactions)
+</html>''', total_checkins=total_checkins, interactions=interactions, mood_counts=mood_counts, mood_timeline=mood_timeline)
 
 @app.route('/check-in', methods=['GET', 'POST'])
 @login_required
