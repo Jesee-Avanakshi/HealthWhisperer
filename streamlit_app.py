@@ -451,10 +451,8 @@ def show_history_page():
         # Prepare data for display
         display_df = history_df.copy()
         # Convert timestamp to datetime and format
-        for idx, row in display_df.iterrows():
-            timestamp = pd.to_datetime(row['Timestamp'])
-            display_df.at[idx, 'Date'] = timestamp.strftime('%b %d, %Y')
-            display_df.at[idx, 'Time'] = timestamp.strftime('%I:%M %p')
+        display_df['Date'] = pd.to_datetime(display_df['Timestamp']).dt.strftime('%b %d, %Y')
+        display_df['Time'] = pd.to_datetime(display_df['Timestamp']).dt.strftime('%I:%M %p')
         
         # Display as expandable entries
         for idx, row in display_df.iterrows():
