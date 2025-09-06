@@ -12,7 +12,12 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "health-whisperer-secret-key-2025")
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL','sqlite:///health_whisperer.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL',
+    'sqlite:///health_whisperer.db'  # fallback if DATABASE_URL is not set
+)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
@@ -1746,4 +1751,4 @@ def history():
 </html>''', interactions=interactions)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
