@@ -8,6 +8,8 @@ import csv
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
+from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -19,6 +21,37 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+
+# -----------------------------
+# Database Setup (PostgreSQL)
+# -----------------------------
+DATABASE_URL = os.getenv("DATABASE_URL")  # e.g. postgresql://user:pass@host:5432/dbname
+if not DATABASE_URL:
+    st.error("❌ DATABASE_URL not set. Please configure your PostgreSQL connection string.")
+    st.stop()
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+class WellnessInteraction(Base):
+    __tablename__ = "wellness_interactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    session_id = Column(String, index=True)
+    mood_input = Column(Text)
+    ai_suggestion = Column(Text)
+
+# Create tables if they don’t exist
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    st.error(f"❌ Database setup failed: {e}")
+    st.stop()
+
+
 
 # Initialize Gemini client
 @st.cache_resource
@@ -76,45 +109,45 @@ def get_wellness_suggestion(mood_input, client):
         return "Take three deep breaths and remember that this feeling is temporary. You are stronger than you know."
 
 # Data logging functions
-CSV_FILE = 'wellness_interactions.csv'
-
-def log_interaction(mood_input, ai_suggestion, session_id=None):
-    """Log user interaction to CSV file"""
+def log_interaction(mood_input, ai_suggestion, session_id):
+    """Log user interaction to PostgreSQL"""
     try:
-        file_exists = os.path.isfile(CSV_FILE)
-        
-        with open(CSV_FILE, 'a', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            
-            if not file_exists:
-                writer.writerow(['Timestamp', 'Session_ID', 'Mood_Input', 'AI_Suggestion'])
-            
-            writer.writerow([
-                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                session_id or st.session_state.get('session_id', 'anonymous'),
-                mood_input,
-                ai_suggestion
-            ])
-                
+        db = SessionLocal()
+        interaction = WellnessInteraction(
+            session_id=session_id,
+            mood_input=mood_input,
+            ai_suggestion=ai_suggestion
+        )
+        db.add(interaction)
+        db.commit()
     except Exception as e:
-        st.error(f"Error logging interaction: {e}")
+        st.error(f"❌ Error logging interaction: {e}")
+    finally:
+        db.close()
 
-def get_user_history(session_id=None):
-    """Retrieve user history from CSV file"""
+def get_user_history(session_id):
+    """Retrieve user history from PostgreSQL"""
     try:
-        if not os.path.isfile(CSV_FILE):
-            return pd.DataFrame()
-        
-        df = pd.read_csv(CSV_FILE)
-        
-        if session_id:
-            df = df[df['Session_ID'] == session_id]
-        
-        return df
-        
-    except Exception as e:
-        st.error(f"Error retrieving history: {e}")
+        db = SessionLocal()
+        interactions = db.query(WellnessInteraction).filter(
+            WellnessInteraction.session_id == session_id
+        ).order_by(WellnessInteraction.timestamp.desc()).all()
+        db.close()
+
+        # Convert to DataFrame for Streamlit display
+        if interactions:
+            data = [{
+                "Timestamp": i.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                "Session_ID": i.session_id,
+                "Mood_Input": i.mood_input,
+                "AI_Suggestion": i.ai_suggestion
+            } for i in interactions]
+            return pd.DataFrame(data)
         return pd.DataFrame()
+    except Exception as e:
+        st.error(f"❌ Error retrieving history: {e}")
+        return pd.DataFrame()
+
 
 # Initialize session state
 def init_session_state():

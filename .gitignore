@@ -1,27 +1,45 @@
-# Virtual environment
-.venv/
-env/
-venv/
-
-# Python cache
+# ---- Python ----
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+dist/
+build/
 
-# Local DB & data
-*.db
+# ---- Virtual Environment ----
+.venv/
+venv/
+env/
+ENV/
+
+# ---- Environment Variables / Secrets ----
+.env
+*.key
+*.pem
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# ---- Databases / Data ----
 *.sqlite3
+*.db
 *.csv
+instance/
+
+# ---- Logs ----
 *.log
 
-# Replit/Editor
-.replit
-replit.md
-.local/
-.lock
-CACHEDIR.TAG
-.pytest_cache/
+# ---- Node/Frontend (if ever added) ----
+node_modules/
+npm-debug.log*
 
-# OS files
-.DS_Store
-Thumbs.db
+# ---- AWS / Deployment ----
+*.zip
+*.tar.gz
+*.bak
